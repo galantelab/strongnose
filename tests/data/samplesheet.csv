@@ -1,0 +1,2 @@
+sample,vcf,tbi
+toy,tests/data/test.vcf.gz,tests/data/test.vcf.gz.tbi
