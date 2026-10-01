@@ -6,6 +6,7 @@
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_strongnose_pipeline'
+include { BCFTOOLS_QUERY         } from '../modules/nf-core/bcftools/query/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -20,6 +21,13 @@ workflow STRONGNOSE {
     main:
 
     ch_versions = channel.empty()
+
+    ch_vcf = ch_samplesheet.map { meta, files ->
+        tuple(meta, files[0], files[1])
+    }
+
+    BCFTOOLS_QUERY(ch_vcf, [], [], [])
+    ch_fasta = BCFTOOLS_QUERY.out.output
 
     //
     // Collate and save software versions
