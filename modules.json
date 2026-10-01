@@ -4,7 +4,13 @@
   "repos": {
     "https://github.com/nf-core/modules.git": {
       "modules": {
-        "nf-core": {}
+        "nf-core": {
+          "bcftools/query": {
+            "branch": "master",
+            "git_sha": "feef37435aea56816adf4b3bde1fc76aac327a8d",
+            "installed_by": ["modules"]
+          }
+        }
       },
       "subworkflows": {
         "nf-core": {
