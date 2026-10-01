@@ -9,6 +9,11 @@
             "branch": "master",
             "git_sha": "feef37435aea56816adf4b3bde1fc76aac327a8d",
             "installed_by": ["modules"]
+          },
+          "repeatmasker/repeatmasker": {
+            "branch": "master",
+            "git_sha": "99b4746814df41be9ad0be58fed81b8d6c6de6c0",
+            "installed_by": ["modules"]
           }
         }
       },
