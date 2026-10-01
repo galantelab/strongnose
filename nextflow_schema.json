@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/galantelab/strongnose/main/nextflow_schema.json",
   "title": "galantelab/strongnose pipeline parameters",
-  "description": "🐕 Sniffing out and classifying structural variations from Sniffles outputs",
+  "description": "\ud83d\udc15 Sniffing out and classifying structural variations from Sniffles outputs",
   "type": "object",
   "$defs": {
     "input_output_options": {
@@ -201,5 +201,19 @@
     {
       "$ref": "#/$defs/generic_options"
     }
-  ]
+  ],
+  "properties": {
+    "vcf_precise": {
+      "type": "boolean",
+      "default": true
+    },
+    "vcf_svlen": {
+      "type": "integer",
+      "default": 50
+    },
+    "vcf_support": {
+      "type": "integer",
+      "default": 5
+    }
+  }
 }
