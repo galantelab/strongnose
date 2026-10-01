@@ -1,2 +1,2 @@
 sample,vcf,tbi
-toy,tests/data/test.vcf.gz,tests/data/test.vcf.gz.tbi
+toy,/home/scratch60/tmiller_strongnose_20261130/strongnose/tests/data/test.vcf.gz,/home/scratch60/tmiller_strongnose_20261130/strongnose/tests/data/test.vcf.gz.tbi

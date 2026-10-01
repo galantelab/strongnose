@@ -1,0 +1,19 @@
+{
+    "-profile test": {
+        "content": [
+            null,
+            [
+                "pipeline_info",
+                "pipeline_info/strongnose_software_versions.yml"
+            ],
+            [
+                
+            ]
+        ],
+        "meta": {
+            "nf-test": "0.9.3",
+            "nextflow": "25.10.3"
+        },
+        "timestamp": "2026-10-01T15:28:25.966709526"
+    }
+}
