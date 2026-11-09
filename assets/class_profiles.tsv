@@ -1,0 +1,32 @@
+# One row per event profile. Only hits whose RepeatMasker class/family matches rm_family_match are treated as candidate mobile elements
+# (allow-list: everything else - Simple_repeat, Low_complexity, Satellite, Unknown, DNA, ERV1, ERVL... - is never promoted by name).
+#
+# profile          unique id of the event profile
+# group            links to the group column of subfamilies.tsv
+# rm_family_match  regex matched against col 11 (class/family) of the RepeatMasker .out
+# enabled          yes | no   (profiles set to no are skipped)
+# rule             named rule function: single_element | ltr_int_ltr | solo_ltr
+# young_tiers      tiers from subfamilies.tsv that count as "young" for this profile (comma separated)
+# evidence         evidence items besides "young", separated by ";". polya | tsd | structure
+#                  confidence: high_confidence = young + ALL evidence items; probable = young + some but not all; low = the rest
+#                  (with two evidence items "some but not all" = exactly one, matching the original definition)
+# tsd_min/tsd_max  target site duplication length range (bp), searched in the reference flank window set in config.toml
+# tsd_min_identity minimum identity of the two TSD copies (tolerates ONT errors; 1.0 = exact)
+# min_cov          minimum fraction of the insertion covered by the primary element (after merging fragments)
+# len_min/len_max  accepted insertion length range (bp), from the Sniffles call
+# rule_params      key=value pairs separated by ";" read by the named rule
+#   max_strand_switch        max strand changes allowed inside the element (L1: 1 for 5' inversion)
+#   max_3end_left            max bases of the consensus 3' end missing; from the "(left)" column of the .out (3' end must be present)
+#   allow_3prime_transduction  unique sequence between element and poly-A is accepted (lowers effective coverage)
+#   absorb_inside_span       hit classes inside the span of the primary element that count as part of it (SVA components)
+#   ltr_names / internal_names  repeat names for provirus parts (names are alias-aware, see subfamilies.tsv)
+#   ltr_len                  accepted LTR length range, min-max bp
+#   internal_min             minimum internal-region length (bp)
+#   same_orientation         both LTRs must have the same orientation
+#   ltr_min_identity         minimum identity between the two LTR copies in the insertion (young proviruses have near-identical LTRs)
+profile	group	rm_family_match	enabled	rule	young_tiers	evidence	tsd_min	tsd_max	tsd_min_identity	min_cov	len_min	len_max	rule_params	notes
+Alu	Alu	SINE/Alu	yes	single_element	active,young	polya;tsd	7	20	0.85	0.70	150	450	max_strand_switch=0;max_3end_left=30	full length ~300 bp; poly-A at the 3' end of the element (on C hits it appears as poly-T at the 5' side of the insertion); plain Alu (generic tier) is judged by divergence only
+L1	L1	LINE/L1	yes	single_element	active,young	polya;tsd	7	30	0.85	0.50	150	9000	max_strand_switch=1;max_3end_left=100;allow_3prime_transduction=yes	5' truncation is normal, so only the 3' end is required; 5' inversion allowed; check ORF2/3'UTR hits in the .out when merging
+SVA	SVA	Retroposon/SVA	yes	single_element	active,young	polya;tsd	7	20	0.85	0.50	300	6000	max_strand_switch=0;max_3end_left=100;absorb_inside_span=Simple_repeat,Low_complexity,SINE/Alu	composite element: Alu-like and VNTR pieces inside the SVA span count as SVA, not as separate Alu or artifact hits; SVA_A to SVA_C are not young
+HERVK_provirus	HERVK	LTR/ERVK	yes	ltr_int_ltr	active	structure;tsd	4	6	1.00	0.80	6000	11000	ltr_names=LTR5_Hs,LTR5A,LTR5B,LTR5;internal_names=HERVK-int,HERVK;ltr_len=600-1100;internal_min=4000;same_orientation=yes;ltr_min_identity=0.95	structure = two LTR5 copies in the same orientation flanking an internal region; only LTR5_Hs counts as young, so LTR5A/LTR5B proviruses end up low; HERVK-int was not observed in the first dataset, so any internal-region hit (or unannotated internal sequence) is accepted; no poly-A expected
+HERVK_solo_ltr	HERVK	LTR/ERVK	no	solo_ltr	active	structure;tsd	4	6	1.00	0.80	600	1100	ltr_names=LTR5_Hs	disabled by default; a lone LTR insertion may come from recombination of an existing provirus and is weaker evidence of a new retrotransposition; enable if you want these calls
