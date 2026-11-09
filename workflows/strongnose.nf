@@ -6,7 +6,8 @@
 include { paramsSummaryMap          } from 'plugin/nf-schema'
 include { softwareVersionsToYAML    } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText    } from '../subworkflows/local/utils_nfcore_strongnose_pipeline'
-include { BCFTOOLS_QUERY            } from '../modules/nf-core/bcftools/query/main'
+include { BCFTOOLS_QUERY  as VCF_TO_FASTA } from '../modules/nf-core/bcftools/query/main'
+include { BCFTOOLS_QUERY  as VCF_TO_BED   } from '../modules/nf-core/bcftools/query/main'
 include { REPEATMASKER_REPEATMASKER } from '../modules/nf-core/repeatmasker/repeatmasker/main'
 
 /*
@@ -27,8 +28,9 @@ workflow STRONGNOSE {
         tuple(meta, files[0], files[1])
     }
 
-    BCFTOOLS_QUERY(ch_vcf, [], [], [])
-    ch_fasta = BCFTOOLS_QUERY.out.output
+    VCF_TO_BED(ch_vcf, [], [], [])
+    VCF_TO_FASTA(ch_vcf, [], [], [])
+    ch_fasta = VCF_TO_FASTA.out.output
 
     REPEATMASKER_REPEATMASKER(ch_fasta, [])
 
