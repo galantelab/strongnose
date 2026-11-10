@@ -6,17 +6,25 @@ package Strongnose::Common;
 #   open_in($path)        read handle; "-" is STDIN, "*.gz" is read through gzip
 #   open_out($path)       write handle; undef or "-" is STDOUT
 #   tsv_row(@fields)      one tab-separated line, newline included
-#   read_tsv($path)       (\@header, \@rows) with each row a hashref; "#" comment lines and blank lines are skipped
+#   read_tsv($path)       (\@header, \@rows) with each row a hashref; "#" comment lines and blank lines are skipped;
+#                         rows shorter than the header are padded with empty fields, longer rows are an error
 #   read_bed4($path)      { sniffles_id => [chrom, start, end] }
 #   parse_rm_line($line)  hashref for a RepeatMasker .out hit line; undef for header/blank lines; dies on a malformed hit line
 #   hit_columns()         column order of hits.tsv
+#   name_normalizer(%o)   coderef mapping a repeat name to the key used for table lookups (see below)
+#   need_columns($file, \@header, @names)   die unless every name is a column of the table
+#   parse_params($str)    "k=v;k2=v2" (the rule_params column) -> hashref; a bare "k" is 1
+#   merge_intervals(@iv)  sort and join [start,end] pairs (inclusive, 1-based) that overlap or touch
+#   intervals_len(@iv)    number of bases covered by the union of the pairs
+#   overlap_len(s1,e1,s2,e2)  bases shared by two inclusive intervals (0 when disjoint)
 
 use strict;
 use warnings;
 use Exporter 'import';
 
 our $VERSION   = '0.01';
-our @EXPORT_OK = qw(open_in open_out tsv_row read_tsv read_bed4 parse_rm_line hit_columns);
+our @EXPORT_OK = qw(open_in open_out tsv_row read_tsv read_bed4 parse_rm_line hit_columns name_normalizer
+                    need_columns parse_params merge_intervals intervals_len overlap_len);
 
 # ---------------------------------------------------------------- files
 
@@ -60,8 +68,9 @@ sub read_tsv {
             @header = @f;
             next;
         }
-        die "$path:$.: expected " . scalar(@header) . " columns, got " . scalar(@f) . "\n"
-            if @f != @header;
+        die "$path:$.: expected at most " . scalar(@header) . " columns, got " . scalar(@f) . "\n"
+            if @f > @header;
+        push @f, ('') x (@header - @f);          # short rows: missing trailing fields are empty (hand-edited files)
         my %row;
         @row{@header} = @f;
         push @rows, \%row;
@@ -149,6 +158,90 @@ sub parse_rm_line {
         rm_id      => $rm_id,
         overlapped => (defined $star && $star eq '*') ? 1 : 0,
     };
+}
+
+# ------------------------------------------------------------------ names
+
+# name_normalizer(case_insensitive => 1, strip_suffixes => '_5,_5end,_3end', int_equivalent => 1)
+# Returns a coderef that maps a repeat name to the key used to look it up, so that library variants
+# of one name meet: L1MEc / L1MEC_5, HERVK9-int / HERVK9I.
+#   case_insensitive  fold case
+#   strip_suffixes    comma list; the first one the name ends with is removed (positional consensus fragments)
+#   int_equivalent    a trailing "-int" becomes "I"
+sub name_normalizer {
+    my (%o) = @_;
+    my $ci    = exists $o{case_insensitive} ? $o{case_insensitive} : 1;
+    my $int   = exists $o{int_equivalent}   ? $o{int_equivalent}   : 1;
+    my $strip = defined $o{strip_suffixes}  ? $o{strip_suffixes}   : '_5,_5end,_3end';
+    my @suffix = sort { length($b) <=> length($a) }
+                 grep { length }
+                 map  { my $s = $_; $s =~ s/^\s+|\s+\z//g; $ci ? lc $s : $s }
+                 split /,/, $strip;
+    return sub {
+        my ($name) = @_;
+        my $n = $ci ? lc $name : $name;
+        for my $s (@suffix) {
+            if (length($n) > length($s) && substr($n, -length($s)) eq $s) {
+                substr($n, -length($s)) = '';
+                last;
+            }
+        }
+        $n =~ s/-int\z/$ci ? 'i' : 'I'/e if $int;
+        return $n;
+    };
+}
+
+# ----------------------------------------------------------- tables, params
+
+sub need_columns {
+    my ($file, $header, @need) = @_;
+    my %have = map { $_ => 1 } @$header;
+    my @missing = grep { !$have{$_} } @need;
+    die "$file: missing column(s): " . join(', ', @missing) . "\n" if @missing;
+    return 1;
+}
+
+sub parse_params {
+    my ($str) = @_;
+    my %p;
+    return \%p unless defined $str && length $str;
+    for my $kv (split /;/, $str) {
+        $kv =~ s/^\s+|\s+\z//g;
+        next unless length $kv;
+        my ($k, $v) = split /=/, $kv, 2;
+        $p{$k} = defined $v ? $v : 1;
+    }
+    return \%p;
+}
+
+# ------------------------------------------------------------- intervals
+
+sub merge_intervals {
+    my @iv = sort { $a->[0] <=> $b->[0] || $a->[1] <=> $b->[1] }
+             grep { $_->[1] >= $_->[0] } @_;
+    my @out;
+    for my $i (@iv) {
+        if (@out && $i->[0] <= $out[-1][1] + 1) {
+            $out[-1][1] = $i->[1] if $i->[1] > $out[-1][1];
+        }
+        else {
+            push @out, [@$i];
+        }
+    }
+    return @out;
+}
+
+sub intervals_len {
+    my $n = 0;
+    $n += $_->[1] - $_->[0] + 1 for merge_intervals(@_);
+    return $n;
+}
+
+sub overlap_len {
+    my ($s1, $e1, $s2, $e2) = @_;
+    my $s = $s1 > $s2 ? $s1 : $s2;
+    my $e = $e1 < $e2 ? $e1 : $e2;
+    return $e >= $s ? $e - $s + 1 : 0;
 }
 
 1;
