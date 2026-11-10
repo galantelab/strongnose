@@ -18,17 +18,17 @@ usage: parse_rm_out.pl [--bed insertions.bed4] [--out hits.tsv] sample.fa.out [m
 Input files may be "-" (STDIN) or gzipped (*.gz). Several .out files are concatenated.
 
 Columns of hits.tsv:
-  hit_row                     order of the hit in the input (unique)
-  query                       Sniffles ID
+  hit_row        order of the hit in the input (unique)
+  query          Sniffles ID
   chrom, bed_start, bed_end   from the BED ('.' without --bed or when the ID is missing from it)
   q_start, q_end, q_len       position in the insertion; q_len = q_end + (left)
-  strand         + or -       (RepeatMasker "C" becomes "-")
+  strand         + or -  (RepeatMasker "C" becomes "-")
   score, div, del, ins        SW score and the three percentages
   repeat, rm_family           repeat name and class/family, e.g. AluYa5, SINE/Alu
   c_start, c_end, c_len       position in the repeat consensus; always c_start < c_end; c_len = c_end + c_left
-  c_left                      consensus bases missing after c_end (3' side), the same for + and - hits
-  rm_id                       RepeatMasker element ID (fragments of one element share it)
-  overlapped                  1 when the hit carries the "*" flag (overlapped by a higher-scoring hit)
+  c_left         consensus bases missing after c_end (3' side), the same for + and - hits
+  rm_id          RepeatMasker element ID (fragments of one element share it)
+  overlapped     1 when the hit carries the "*" flag (overlapped by a higher-scoring hit)
 USAGE
 }
 
@@ -65,7 +65,8 @@ for my $file (@ARGV ? @ARGV : '-') {
             if (my $coords = $bed->{ $h->{query} }) { ($chrom, $bed_start, $bed_end) = @$coords }
             else                                    { $no_bed{ $h->{query} } = 1 }
         }
-        $clen{ $h->{repeat} }{ $h->{c_len} }++;
+        # Simple repeats and low complexity have no fixed consensus: their "length" is the matched array
+        $clen{ $h->{repeat} }{ $h->{c_len} }++ unless $h->{rm_family} =~ /^(?:Simple_repeat|Low_complexity)/;
 
         print {$out} tsv_row(
             $n_hits, $h->{query}, $chrom, $bed_start, $bed_end,
