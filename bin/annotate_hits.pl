@@ -39,7 +39,9 @@ Columns added to hits.tsv:
   profiles         enabled profiles the hit belongs to ('.' when none)
   div_corr         max(0, div - ont-div-correction)
   young_profiles   profiles for which the tier counts as young and div_corr is within the ceiling ('.' when none)
-  div_limit        the ceiling that applies to the hit (tier ceiling or per-name max_div); '.' when there is none
+  div_limit        the ceiling applied to this hit (per-name max_div or the tier ceiling); '.' for tiers without one
+  tier_young_profiles  profiles whose young_tiers include the tier, whatever the divergence ('.' when none);
+                   merge_hits.pl uses these two to judge age on the merged element instead of on single fragments
 
 Ceilings come from --max-div-* by tier; a max_div in subfamilies.tsv overrides the ceiling for that name.
 Tiers without a ceiling (intermediate, old, internal) are never young. A profile's rm_family_match is
@@ -115,7 +117,8 @@ my @artifact = grep { length } map { my $s = $_; $s =~ s/^\s+|\s+\z//g; $s } spl
 # ---- hits
 my ($hh, $hits) = read_tsv($ARGV[0]);
 need_columns($ARGV[0], $hh, qw(query repeat rm_family div));
-my @new_cols = qw(name_norm group tier tier_source hit_kind profiles div_corr young_profiles div_limit);
+my @new_cols = qw(name_norm group tier tier_source hit_kind profiles div_corr young_profiles div_limit
+                  tier_young_profiles);
 
 my $out = open_out($o{out});
 print {$out} tsv_row(@$hh, @new_cols);
@@ -141,10 +144,9 @@ for my $r (@$hits) {
     $corr = 0 if $corr < 0;
 
     my $limit = $kind eq 'candidate' ? ($override ne '' ? $override : $ceiling{$tier}) : undef;
-    my @young;
-    if (defined $limit && $corr <= $limit) {
-        @young = map { $_->{id} } grep { $_->{young}{$tier} } @belong;
-    }
+    my @tier_young;
+    @tier_young = map { $_->{id} } grep { $_->{young}{$tier} } @belong if $kind eq 'candidate';
+    my @young = (defined $limit && $corr <= $limit) ? @tier_young : ();
 
     $seen_query{ $r->{query} } = 1;
     $kind_n{$kind}++;
@@ -163,6 +165,7 @@ for my $r (@$hits) {
         sprintf('%.2f', $corr),
         (@young ? join(',', @young) : '.'),
         (defined $limit ? $limit : '.'),
+        (@tier_young ? join(',', @tier_young) : '.'),
     );
 }
 close $out if defined $o{out};
