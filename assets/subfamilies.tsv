@@ -1,3 +1,4 @@
+# subfamilies.tsv - v1. Reconciled against observed_names.txt (T2T-style RepeatMasker run).
 # repeat_name = exact RepeatMasker name (join key). Names not listed here default to tier=old.
 # tier: active | young | intermediate | old | internal | generic
 #   internal = internal region of a multi-part element (e.g. HERVK-int); carries no age itself, age comes from its LTRs.
@@ -11,70 +12,70 @@ AluYb8	Alu	active	SINE/Alu		most active human Alu subfamily
 AluYb9	Alu	active	SINE/Alu		active, low copy number
 AluY	Alu	young	SINE/Alu		parent Y subfamily; weaker age evidence than Ya5/Yb8
 AluYa8	Alu	young	SINE/Alu		added in v1 (observed)
-AluYc	Alu	young	SINE/Alu
-AluYc3	Alu	young	SINE/Alu
-AluYd8	Alu	young	SINE/Alu
-AluYe5	Alu	young	SINE/Alu
-AluYe6	Alu	young	SINE/Alu
-AluYf1	Alu	young	SINE/Alu
-AluYg6	Alu	young	SINE/Alu
+AluYc	Alu	young	SINE/Alu		
+AluYc3	Alu	young	SINE/Alu		
+AluYd8	Alu	young	SINE/Alu		
+AluYe5	Alu	young	SINE/Alu		
+AluYe6	Alu	young	SINE/Alu		
+AluYf1	Alu	young	SINE/Alu		
+AluYg6	Alu	young	SINE/Alu		
 AluYh3	Alu	young	SINE/Alu		added in v1 (observed)
 AluYh3a3	Alu	young	SINE/Alu		not observed
-AluYh7	Alu	young	SINE/Alu
-AluYh9	Alu	young	SINE/Alu
-AluYi6	Alu	young	SINE/Alu
+AluYh7	Alu	young	SINE/Alu		
+AluYh9	Alu	young	SINE/Alu		
+AluYi6	Alu	young	SINE/Alu		
 AluYi6_4d	Alu	young	SINE/Alu		variant of AluYi6; added in v1 (observed)
-AluYj4	Alu	young	SINE/Alu
-AluYk11	Alu	young	SINE/Alu
-AluYk12	Alu	young	SINE/Alu
-AluYk2	Alu	young	SINE/Alu
-AluYk3	Alu	young	SINE/Alu
-AluYk4	Alu	young	SINE/Alu
-AluYm1	Alu	young	SINE/Alu
+AluYj4	Alu	young	SINE/Alu		
+AluYk11	Alu	young	SINE/Alu		
+AluYk12	Alu	young	SINE/Alu		
+AluYk2	Alu	young	SINE/Alu		
+AluYk3	Alu	young	SINE/Alu		
+AluYk4	Alu	young	SINE/Alu		
+AluYm1	Alu	young	SINE/Alu		
 Alu	Alu	generic	SINE/Alu		generic Alu consensus (107 hits observed); no subfamily resolution, age from div only
 AluSx1	Alu	intermediate	SINE/Alu		AluS: mostly old, a few low-level polymorphic copies reported
-AluSx	Alu	intermediate	SINE/Alu
-AluSx3	Alu	intermediate	SINE/Alu
-AluSx4	Alu	intermediate	SINE/Alu
-AluSz	Alu	intermediate	SINE/Alu
-AluSz6	Alu	intermediate	SINE/Alu
-AluSq	Alu	intermediate	SINE/Alu
-AluSq2	Alu	intermediate	SINE/Alu
-AluSq4	Alu	intermediate	SINE/Alu
+AluSx	Alu	intermediate	SINE/Alu		
+AluSx3	Alu	intermediate	SINE/Alu		
+AluSx4	Alu	intermediate	SINE/Alu		
+AluSz	Alu	intermediate	SINE/Alu		
+AluSz6	Alu	intermediate	SINE/Alu		
+AluSq	Alu	intermediate	SINE/Alu		
+AluSq2	Alu	intermediate	SINE/Alu		
+AluSq4	Alu	intermediate	SINE/Alu		
 AluSq10	Alu	intermediate	SINE/Alu		added in v1 (observed)
-AluSp	Alu	intermediate	SINE/Alu
-AluSc	Alu	intermediate	SINE/Alu
-AluSc5	Alu	intermediate	SINE/Alu
-AluSc8	Alu	intermediate	SINE/Alu
-AluSg	Alu	intermediate	SINE/Alu
-AluSg4	Alu	intermediate	SINE/Alu
-AluSg7	Alu	intermediate	SINE/Alu
+AluSp	Alu	intermediate	SINE/Alu		
+AluSc	Alu	intermediate	SINE/Alu		
+AluSc5	Alu	intermediate	SINE/Alu		
+AluSc8	Alu	intermediate	SINE/Alu		
+AluSg	Alu	intermediate	SINE/Alu		
+AluSg4	Alu	intermediate	SINE/Alu		
+AluSg7	Alu	intermediate	SINE/Alu		
 AluJb	Alu	old	SINE/Alu		AluJ: ancient, listed for completeness
-AluJo	Alu	old	SINE/Alu
-AluJr	Alu	old	SINE/Alu
-AluJr4	Alu	old	SINE/Alu
+AluJo	Alu	old	SINE/Alu		
+AluJr	Alu	old	SINE/Alu		
+AluJr4	Alu	old	SINE/Alu		
 FLAM_A	Alu	old	SINE/Alu		free left Alu monomer, ancient
 FLAM_C	Alu	old	SINE/Alu		free left Alu monomer, ancient
 FRAM	Alu	old	SINE/Alu		free right Alu monomer, ancient
 FAM	Alu	old	SINE/Alu		fossil Alu monomer, ancient
 L1HS	L1	active	LINE/L1		human-specific, the only consistently active L1
 L1PA2	L1	young	LINE/L1		a few polymorphic copies
-L1PA3	L1	young	LINE/L1
-L1PA4	L1	young	LINE/L1
-L1PA5	L1	young	LINE/L1
-L1PA6	L1	young	LINE/L1
-L1PA7	L1	intermediate	LINE/L1
-L1PA8	L1	intermediate	LINE/L1
-L1PA8A	L1	intermediate	LINE/L1
+L1PA3	L1	young	LINE/L1		
+L1PA4	L1	young	LINE/L1		
+L1PA5	L1	young	LINE/L1		
+L1PA6	L1	young	LINE/L1		
+L1PA7	L1	intermediate	LINE/L1		
+L1PA8	L1	intermediate	LINE/L1		
+L1PA8A	L1	intermediate	LINE/L1		
 SVA_F1	SVA	active	Retroposon/SVA		not observed; newer Dfam releases only
-SVA_F	SVA	active	Retroposon/SVA
-SVA_E	SVA	active	Retroposon/SVA
-SVA_D	SVA	young	Retroposon/SVA
-SVA_C	SVA	intermediate	Retroposon/SVA
-SVA_B	SVA	intermediate	Retroposon/SVA
-SVA_A	SVA	intermediate	Retroposon/SVA
+SVA_F	SVA	active	Retroposon/SVA		
+SVA_E	SVA	active	Retroposon/SVA		
+SVA_D	SVA	young	Retroposon/SVA		
+SVA_C	SVA	intermediate	Retroposon/SVA		
+SVA_B	SVA	intermediate	Retroposon/SVA		
+SVA_A	SVA	intermediate	Retroposon/SVA		
 LTR5_Hs	HERVK	active	LTR/ERVK		HML-2 LTR, human-specific; the spelling used in this library
-LTR5A	HERVK	intermediate	LTR/ERVK
+LTR5A	HERVK	intermediate	LTR/ERVK		
 LTR5B	HERVK	intermediate	LTR/ERVK		not observed
-LTR5	HERVK	old	LTR/ERVK
+LTR5	HERVK	old	LTR/ERVK		
 HERVK-int	HERVK	internal	LTR/ERVK		HML-2 internal region; not observed, so provirus rule must tolerate its absence; age comes from flanking LTR5 hits
