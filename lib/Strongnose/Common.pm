@@ -17,6 +17,8 @@ package Strongnose::Common;
 #   merge_intervals(@iv)  sort and join [start,end] pairs (inclusive, 1-based) that overlap or touch
 #   intervals_len(@iv)    number of bases covered by the union of the pairs
 #   overlap_len(s1,e1,s2,e2)  bases shared by two inclusive intervals (0 when disjoint)
+#   read_fasta($path)     { id => SEQUENCE }; id is the first word of the header, sequence upper-cased and unwrapped
+#   revcomp($seq)         reverse complement (ACGTN, any case)
 
 use strict;
 use warnings;
@@ -24,7 +26,7 @@ use Exporter 'import';
 
 our $VERSION   = '0.01';
 our @EXPORT_OK = qw(open_in open_out tsv_row read_tsv read_bed4 parse_rm_line hit_columns name_normalizer
-                    need_columns parse_params merge_intervals intervals_len overlap_len);
+                    need_columns parse_params merge_intervals intervals_len overlap_len read_fasta revcomp);
 
 # ---------------------------------------------------------------- files
 
@@ -242,6 +244,35 @@ sub overlap_len {
     my $s = $s1 > $s2 ? $s1 : $s2;
     my $e = $e1 < $e2 ? $e1 : $e2;
     return $e >= $s ? $e - $s + 1 : 0;
+}
+
+# ----------------------------------------------------------------- sequences
+
+sub read_fasta {
+    my ($path) = @_;
+    my $fh = open_in($path);
+    my (%seq, $id);
+    while (my $line = <$fh>) {
+        $line =~ s/\r?\n\z//;
+        if ($line =~ /^>(\S+)/) {
+            $id = $1;
+            die "$path:$.: duplicate sequence ID $id\n" if exists $seq{$id};
+            $seq{$id} = '';
+        }
+        elsif (defined $id) {
+            $line =~ s/\s+//g;
+            $seq{$id} .= uc $line;
+        }
+    }
+    close $fh unless $path eq '-';
+    return \%seq;
+}
+
+sub revcomp {
+    my ($s) = @_;
+    $s = reverse $s;
+    $s =~ tr/ACGTNacgtn/TGCANtgcan/;
+    return $s;
 }
 
 1;
