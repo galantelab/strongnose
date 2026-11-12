@@ -3,6 +3,9 @@
 Status: working pipeline, tested on one human ONT sample (hg38). Every threshold is a starting value that has not been
 validated against a truth set. Section 9 lists what remains to be done.
 
+Every fixed value the tables can contain (confidence levels, gates, flags, discard reasons, statuses) is listed in
+[TAGS.md](TAGS.md).
+
 ## 1. Purpose and scope
 
 Strongnose takes insertion calls from Sniffles2 and decides which of them are new insertions of human mobile elements.
@@ -347,5 +350,5 @@ bin/        parse_rm_out.pl annotate_hits.pl merge_hits.pl find_polya.pl extract
 lib/Strongnose/Common.pm   shared helpers (TSV and BED readers, RepeatMasker line parser, FASTA, reverse complement, intervals)
 assets/     subfamilies.tsv class_profiles.tsv
 conf/       mobile_dna.config   (Nextflow params; each one maps to a script option)
-docs/       METHODS.md
+docs/       METHODS.md TAGS.md
 ```
