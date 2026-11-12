@@ -136,9 +136,10 @@ reports inconsistencies; Simple_repeat and Low_complexity are exempt because the
 
 Normalises repeat names (case, positional suffixes such as `_5`/`_3end`, `-int` versus `I`), looks them up in
 `subfamilies.tsv`, and attaches group and tier. A hit is young for a profile when its tier is in the profile's
-`young_tiers` and its corrected divergence is under the ceiling of the tier (`max_div_active` 8, `max_div_young` 10,
-`max_div_generic` 6). The corrected divergence is the `perc div` of the `.out` reduced by `ont_div_correction`
-(percentage points, floor 0; 0.0 by default, to be calibrated).
+`young_tiers` and its corrected divergence is under the ceiling of the tier (`max_div_active` 4, `max_div_young` 5,
+`max_div_generic` 3), or under the `max_div` of the subfamily when `subfamilies.tsv` gives one (SVA_D/E/F/F1: 12). The
+corrected divergence is the `perc div` of the `.out` reduced by `ont_div_correction` (percentage points, floor 0; 0.0,
+see section 7).
 
 ### 5.3 merge_hits.pl
 
@@ -163,7 +164,7 @@ For each element the tail is searched on the 3' side, from `polya_inside_margin`
 `polya_search_window` (40) bp after it. On minus-strand elements the search runs on the reverse complement. The tail
 is the maximum-scoring segment under a scoring scheme in which an A scores +1 and any other base scores
 `-purity/(1-purity)`, so a segment with an A fraction of at least `polya_min_purity` (0.85) cannot score below zero. This
-tolerates the substitutions and indels that ONT makes in homopolymers, so no exact run is required. The tail must be at
+tolerates the substitutions and indels that ONT makes in homopolymers, so no exact run is required. The search window grows while the tail reaches its far end, so a long tail is measured whole. The tail must be at
 least `polya_min_len` (10) bp and start at most `polya_max_gap` (10) bp after the element end. The table reports the
 tail in insertion coordinates and the number of bases after it (`bases_after_tail`); the tail sequence is shown in
 element orientation (as A).
@@ -221,7 +222,9 @@ Gates (any failure caps the confidence at low): insertion length (`len_min`, `le
 (`min_cov`); 3' end present (`max_3end_left`, from `c_left`); strand switches (`max_strand_switch`). For profiles
 with `join_group_elements=yes` (SVA) the coverage counts all elements of the same group and strand, because RepeatMasker
 splits one SVA among subfamily names (SVA_F, SVA_B, SVA_C), and adjacent Alu, Simple_repeat and Low_complexity pieces that
-lie inside the group span or on its 5' side; a piece after the 3' end is another element.
+lie inside the group span or on its 5' side; a piece after the 3' end is another element. For the same profiles, when the
+largest piece is not young or lacks its 3' end and a young piece of the same group and strand has it, the event is judged by
+that piece (note `three_prime_piece`).
 
 Evidence: `polya` counts when a tail was found, the 3' end is present and at most `polya_max_after_tail` (50) bp follow
 it; `tsd` counts when a TSD was found, is not capped, has a length inside the profile range and the identity required by
@@ -277,9 +280,9 @@ One human sample sequenced with ONT, mapped to hg38, 10,452 PASS insertions with
 
 | Profile | high | probable | low |
 |---|---|---|---|
-| Alu | 1,100 | 187 | 657 |
-| L1 | 47 | 45 | 257 |
-| SVA | 20 | 5 | 290 |
+| Alu | 1,094 | 180 | 670 |
+| L1 | 46 | 45 | 258 |
+| SVA | 28 | 9 | 278 |
 | HERVK provirus | 0 | 0 | 19 |
 
 About 70% of the Sniffles insertions carry no recognisable mobile element (expansions of tandem repeats and other
@@ -307,6 +310,19 @@ at the scan limit); the decoy run found 49.
   the insertion was annotated as SVA_B, SVA_C and AluSx3. The coverage now counts same-group pieces and adjacent pieces on the 5' side. After the
   change, a full-length AluSx3 with its own tail lying after the SVA's poly-A turned out not to be a component of the SVA
   (three events); it raises `element_after_3end` for manual review (3' transduction, composite or second event).
+- **Age calibration.** Among events with poly-A and TSD, the active tier has a median corrected divergence of 0.7% and a
+  95th percentile of 2.7%, and the young tier 1.35% and 4.6%. The insertion sequences are consensus sequences of several reads, so ONT
+  errors add little and `ont_div_correction` stays at 0. The ceilings went from 8 / 10 to 4 / 5, which cost 6 of 1,100
+  high Alus and 1 of 47 high L1s. SVA is the exception: its variable VNTR region inflates the divergence (median 6.4%,
+  maximum 9.2% once the ceiling no longer cuts the distribution), so SVA_D/E/F/F1 carry their own ceiling of 12; with it and
+  an SVA TSD range of 7-30 bp (95th percentile 24 bp) the SVA calls went from 21 high and 7 probable to 28 and 9. About two thirds of the
+  primary elements are young, and this share hardly changed with the tighter ceilings: it reflects the sample, not loose thresholds.
+  Fifty-five events of older tiers also have poly-A and TSD (median divergence 10-15%), which is why age stays a requirement.
+- **Split SVAs.** When the largest piece of an SVA is not the one that carries the 3' end, the event is judged by the young
+  piece that has it (three events in the first sample). Alu is excluded on purpose: an older complete Alu beside an AluY
+  is two elements, not one split element.
+- **Long poly-A tails.** The tail search window now grows while the tail reaches its end; before, a tail longer than the
+  window was cut and the rest counted as sequence after the tail. No tail in the first sample was long enough to be affected.
 - **Poly-A and ONT.** ONT is known to struggle with homopolymers, but poly-A was detected at least as often as the TSD, and
   the tail search is tolerant of errors (purity instead of an exact run), so the two evidence items keep equal weight.
 - **Order of the decoy.** `--decoy` is a calibration tool, not a filter: run it for a new dataset or reference, or after changing the TSD options.
@@ -331,8 +347,8 @@ produce RepeatMasker hits that disappear on T2T. Strongnose should therefore fla
   `select_review.pl`, which gives precision per confidence level and category; (2) simulation of true and false positives
   (known insertions with chosen TSD, poly-A and divergence, plus tandem expansions, random sequence and old elements) to
   estimate recall and precision per tier; (3) comparison with known polymorphic insertions for germline calls.
-- Age: `ont_div_correction` is 0.0 and the divergence ceilings are loose (about two thirds of the primary elements are
-  young). Calibrate on the divergence histograms of AluYa5, AluYb8 and L1HS (`summarize_events.pl`, section 5).
+- Age: the divergence ceilings come from one sample (section 7). `max_div_generic` (3) has no data behind it, and the SVA
+  ceiling (12) is deliberately loose: 42 SVAs are too few to place it. Repeat the calibration on more samples.
 - The TSD p-value is a heuristic; the 0.30 null match is too low in GC-rich or low-complexity flanks, where a TSD
   can be found by chance more often than the decoy rate says.
 - Insertions with an element after the 3' end (transductions, composites) are flagged but not classified separately.
