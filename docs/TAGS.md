@@ -42,6 +42,7 @@ A solo LTR (`HERVK_solo_ltr`) can reach `probable` at most, because its TSD (4-6
 | `ltr_identity=X` | identity of the two LTRs (provirus profiles); `.` for a solo LTR |
 | `structure_fail=REASONS` | the LTR structure was found but is not valid; reasons in section 5 |
 | `no_ltr_structure:REASON` | a provirus or solo-LTR profile without a usable structure row (`single_ltr`, `no_pair`, `ltr_length`, `no_ltr_pair`) |
+| `three_prime_piece` | the event is judged by a young piece of the same group that carries the 3' end, not by the largest piece (SVA split among subfamily names) |
 | `rule_pending:RULE` | the rule of the profile has no implementation, or `--structure` was not given; confidence is low |
 | `unchecked_evidence:ITEMS` | the profile lists an evidence item the classifier does not know |
 

@@ -50,7 +50,9 @@ Per insertion:
   poly-A and 3' end checks do not apply. Rules without an implementation give low and note rule_pending.
   Profiles with join_group_elements=yes (SVA) count elements of the same group and strand, and adjacent pieces of the
   classes of absorb_inside_span (within join_gap bp, 100), towards the coverage gate. Adjacent pieces count only
-  inside the group span or on its 5' side; a piece after the 3' end is not part of the element.
+  inside the group span or on its 5' side; a piece after the 3' end is not part of the element. When the primary
+  (largest) piece is not young or lacks its 3' end and a young piece of the same group and strand has it, that piece
+  is the one judged and reported (note three_prime_piece).
 
 events.tsv columns: query, chrom, pos, ins_len, profile, elem_id, repeat, tier, rm_family, strand, cov,
   div_corr_w, young (1/0), polya_found, polya_len, polya_purity, tsd_found, tsd_len, tsd_identity, tsd_pvalue,
@@ -140,6 +142,16 @@ sub evaluate {
     my ($pid, $e, $ins, $els) = @_;
     my $p  = $prof{$pid};
     my $rp = $p->{rp};
+    my $rep_changed = 0;
+    if (($rp->{join_group_elements} || '') eq 'yes' && defined $rp->{max_3end_left}
+        && (!list_has($e->{young_profiles}, $pid) || $e->{c_left} > $rp->{max_3end_left})) {
+        # the largest piece is not the one that carries the 3' end (SVA_C piece in front of a young SVA_F piece):
+        # judge the element by the young piece of the same group and strand whose 3' end is present
+        my ($alt) = sort { $b->{cov_bases} <=> $a->{cov_bases} }
+                    grep { $_ != $e && $_->{group} eq $p->{group} && $_->{strand} eq $e->{strand}
+                           && list_has($_->{young_profiles}, $pid) && $_->{c_left} <= $rp->{max_3end_left} } @$els;
+        if ($alt) { $e = $alt; $rep_changed = 1 }
+    }
     my @gates;
     push @gates, 'length'   if $ins->{q_len} < $p->{len_min} || $ins->{q_len} > $p->{len_max};
     my $cov = $e->{cov};
@@ -202,8 +214,11 @@ sub evaluate {
     elsif (@pending) {
         $note = 'unchecked_evidence:' . join(',', @pending);
     }
+    elsif ($rep_changed) {
+        $note = 'three_prime_piece';
+    }
     return { pid => $pid, young => $young, polya => $pa, tsd => $td, polya_ok => $polya_ok, tsd_ok => $tsd_ok,
-             ok => $ok, total => $total, gates => \@gates, conf => $conf, note => $note, cov => $cov };
+             ok => $ok, total => $total, gates => \@gates, conf => $conf, note => $note, cov => $cov, rep => $e };
 }
 
 sub is_structure_rule { return $_[0] eq 'ltr_int_ltr' || $_[0] eq 'solo_ltr' }
@@ -276,7 +291,7 @@ for my $ins (@$irows) {
     $n_missing_tsd++ unless $best->{tsd};
 
     my ($pa, $td) = @{$best}{qw(polya tsd)};
-    my $pe = $best->{elem} || $prim;
+    my $pe = $best->{elem} || $best->{rep} || $prim;
     my $cov = defined $best->{cov} ? $best->{cov} : $pe->{cov};
     my $others = join(';', map { "$_->{repeat}/$_->{strand}/$_->{cov}" } grep { $_ != $pe } @els) || '.';
     my @flags;
