@@ -10,3 +10,8 @@ testing*
 null/
 *.log
 !tests/data
+*.txt
+*.tsv
+*.fa
+*.fai
+TODO
