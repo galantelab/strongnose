@@ -18,7 +18,7 @@ required:
 
 options (default):
   --out FILE                    output table (STDOUT)
-  --polya-search-window N       bp searched past the element 3' end (40)
+  --polya-search-window N       bp searched past the element 3' end (40); the window grows while the tail reaches its end
   --polya-inside-margin N       bp before the element 3' end also searched: the hit often swallows the first
                                 bases of the tail (20)
   --polya-max-gap N             the tail must start at most this many bp after the element end (10)
@@ -106,25 +106,35 @@ for my $e (@$elems) {
             if $n_len_diff <= 5;
     }
 
-    my ($rs, $re, $r, $b);                         # region start/end (insertion coordinates), the string, index of the element's last base
-    if ($e->{strand} eq '+') {
-        $rs = $e->{q_end} - $o{'polya-inside-margin'} + 1;
-        $rs = 1 if $rs < 1;
-        $re = $e->{q_end} + $o{'polya-search-window'};
-        $re = $len if $re > $len;
-        $r  = substr($seq, $rs - 1, $re - $rs + 1);
-        $b  = $e->{q_end} - $rs;
-    }
-    else {
-        $rs = $e->{q_start} - $o{'polya-search-window'};
-        $rs = 1 if $rs < 1;
-        $re = $e->{q_start} + $o{'polya-inside-margin'} - 1;
-        $re = $len if $re > $len;
-        $r  = revcomp(substr($seq, $rs - 1, $re - $rs + 1));
-        $b  = $re - $e->{q_start};
+    # The window grows while the tail touches its far end, so a tail longer than the window is measured whole
+    # (otherwise the rest of the tail would be counted as bases after it).
+    my ($rs, $re, $r, $b, $s, $t);                 # region start/end (insertion coordinates), the string, index of the element's last base
+    my $win = $o{'polya-search-window'};
+    while (1) {
+        my $can_grow;
+        if ($e->{strand} eq '+') {
+            $rs = $e->{q_end} - $o{'polya-inside-margin'} + 1;
+            $rs = 1 if $rs < 1;
+            $re = $e->{q_end} + $win;
+            $can_grow = $re < $len;
+            $re = $len if $re > $len;
+            $r  = substr($seq, $rs - 1, $re - $rs + 1);
+            $b  = $e->{q_end} - $rs;
+        }
+        else {
+            $rs = $e->{q_start} - $win;
+            $can_grow = $rs > 1;
+            $rs = 1 if $rs < 1;
+            $re = $e->{q_start} + $o{'polya-inside-margin'} - 1;
+            $re = $len if $re > $len;
+            $r  = revcomp(substr($seq, $rs - 1, $re - $rs + 1));
+            $b  = $re - $e->{q_start};
+        }
+        ($s, $t) = best_tail($r, $b + 1 + $o{'polya-max-gap'});
+        last unless defined $s && $t == length($r) - 1 && $can_grow;
+        $win *= 2;
     }
 
-    my ($s, $t) = best_tail($r, $b + 1 + $o{'polya-max-gap'});
     if (!defined $s) {
         print {$out} tsv_row(@{$e}{qw(query elem_id strand)}, $side, $rs, $re, 0, ('.') x 7);
         next;
