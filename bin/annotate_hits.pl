@@ -22,9 +22,9 @@ required:
 options (default):
   --out FILE                    output table (STDOUT)
   --ont-div-correction N        percentage points subtracted from "div" before the age test (0.0)
-  --max-div-active N            corrected div ceiling for tier "active" (8.0)
-  --max-div-young N             corrected div ceiling for tier "young" (10.0)
-  --max-div-generic N           corrected div ceiling for tier "generic" (6.0)
+  --max-div-active N            corrected div ceiling for tier "active" (4.0)
+  --max-div-young N             corrected div ceiling for tier "young" (5.0)
+  --max-div-generic N           corrected div ceiling for tier "generic" (3.0)
   --[no-]name-case-insensitive  fold case when matching repeat names (on)
   --name-strip-suffixes LIST    comma list of suffixes removed before matching ("_5,_5end,_3end")
   --[no-]name-int-equivalent    treat a trailing "-int" and "I" as the same (on)
@@ -51,9 +51,9 @@ USAGE
 
 my %o = (
     'ont-div-correction'    => 0.0,
-    'max-div-active'        => 8.0,
-    'max-div-young'         => 10.0,
-    'max-div-generic'       => 6.0,
+    'max-div-active'        => 4.0,
+    'max-div-young'         => 5.0,
+    'max-div-generic'       => 3.0,
     'name-case-insensitive' => 1,
     'name-strip-suffixes'   => '_5,_5end,_3end',
     'name-int-equivalent'   => 1,

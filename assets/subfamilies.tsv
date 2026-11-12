@@ -67,10 +67,10 @@ L1PA6	L1	young	LINE/L1
 L1PA7	L1	intermediate	LINE/L1		
 L1PA8	L1	intermediate	LINE/L1		
 L1PA8A	L1	intermediate	LINE/L1		
-SVA_F1	SVA	active	Retroposon/SVA		not observed; newer Dfam releases only
-SVA_F	SVA	active	Retroposon/SVA		
-SVA_E	SVA	active	Retroposon/SVA		
-SVA_D	SVA	young	Retroposon/SVA		
+SVA_F1	SVA	active	Retroposon/SVA	12	not observed; newer Dfam releases only; max_div 12: the VNTR region inflates the divergence of real young SVAs (median 6%), so the tier ceiling does not apply
+SVA_F	SVA	active	Retroposon/SVA	12	max_div 12: the VNTR region inflates the divergence of real young SVAs (median 6%), so the tier ceiling does not apply
+SVA_E	SVA	active	Retroposon/SVA	12	max_div 12: the VNTR region inflates the divergence of real young SVAs (median 6%), so the tier ceiling does not apply
+SVA_D	SVA	young	Retroposon/SVA	12	max_div 12: the VNTR region inflates the divergence of real young SVAs (median 6%), so the tier ceiling does not apply
 SVA_C	SVA	intermediate	Retroposon/SVA		
 SVA_B	SVA	intermediate	Retroposon/SVA		
 SVA_A	SVA	intermediate	Retroposon/SVA		
